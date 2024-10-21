@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,21 +15,30 @@ func main() {
 		fmt.Println("Error compiling regex:", err)
 	}
 
+	sum_id := 0
 	bag_red := 12
 	bag_green := 13
 	bag_blue := 14
 
-	example_game := "Game 1: 1 green, 6 red, 4 blue; 2 blue, 6 green, 7 red; 3 red, 4 blue, 6 green; 3 green; 3 blue, 2 green, 1 red"
+	file, err := os.Open("day2-input")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer file.Close()
 
-	id, _ := strconv.Atoi(r.FindStringSubmatch(example_game)[1])
-	sum_id := 0
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		id, _ := strconv.Atoi(r.FindStringSubmatch(line)[1])
 
-	game_contents := strings.Split(example_game, ":")
-	games := strings.Split(game_contents[1], ";")
-	if validate_game(games, bag_red, bag_green, bag_blue) == true {
-		sum_id += id
+		game_contents := strings.Split(line, ":")
+		games := strings.Split(game_contents[1], ";")
+		if validate_game(games, bag_red, bag_green, bag_blue) == true {
+			sum_id += id
+		}
 	}
 
+	fmt.Println("sum_id is: ", sum_id)
 }
 
 func validate_game(games []string, bag_red int, bag_green int, bag_blue int) bool {
@@ -56,7 +67,7 @@ func validate_game(games []string, bag_red int, bag_green int, bag_blue int) boo
 			num_red_balls, _ = strconv.Atoi(matches[1])
 		}
 
-		if num_green_balls > bag_green && num_blue_balls > bag_blue && num_red_balls > bag_red {
+		if num_green_balls > bag_green || num_blue_balls > bag_blue || num_red_balls > bag_red {
 			return false
 		}
 	}
