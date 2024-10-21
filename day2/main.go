@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -12,28 +13,52 @@ func main() {
 		fmt.Println("Error compiling regex:", err)
 	}
 
-	/*
-		bag_red := 12
-		bag_green := 13
-		bag_blue := 14
-	*/
+	bag_red := 12
+	bag_green := 13
+	bag_blue := 14
 
 	example_game := "Game 1: 1 green, 6 red, 4 blue; 2 blue, 6 green, 7 red; 3 red, 4 blue, 6 green; 3 green; 3 blue, 2 green, 1 red"
 
-	//id_matches := r.FindStringSubmatch(example_game)
-	// id := id_matches[1]
+	id, _ := strconv.Atoi(r.FindStringSubmatch(example_game)[1])
+	sum_id := 0
 
 	game_contents := strings.Split(example_game, ":")
 	games := strings.Split(game_contents[1], ";")
-
-	r, err = regexp.Compile(`(\d+) g`)
-	if err != nil {
-		fmt.Println("Error compiling regex:", err)
+	if validate_game(games, bag_red, bag_green, bag_blue) == true {
+		sum_id += id
 	}
+
+}
+
+func validate_game(games []string, bag_red int, bag_green int, bag_blue int) bool {
+
+	r_g, _ := regexp.Compile(`(\d+) g`)
+	r_r, _ := regexp.Compile(`(\d+) r`)
+	r_b, _ := regexp.Compile(`(\d+) b`)
 
 	for i := range len(games) {
-		fmt.Println(games[i])
-		matches := r.FindStringSubmatch(games[i])
-		fmt.Println("There were ", matches[1], " green balls")
+		num_green_balls := 0
+		num_blue_balls := 0
+		num_red_balls := 0
+
+		matches := r_g.FindStringSubmatch(games[i])
+		if len(matches) > 1 {
+			num_green_balls, _ = strconv.Atoi(matches[1])
+		}
+
+		matches = r_b.FindStringSubmatch(games[i])
+		if len(matches) > 1 {
+			num_blue_balls, _ = strconv.Atoi(matches[1])
+		}
+
+		matches = r_r.FindStringSubmatch(games[i])
+		if len(matches) > 1 {
+			num_red_balls, _ = strconv.Atoi(matches[1])
+		}
+
+		if num_green_balls > bag_green && num_blue_balls > bag_blue && num_red_balls > bag_red {
+			return false
+		}
 	}
+	return true
 }
